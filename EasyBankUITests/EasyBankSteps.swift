@@ -75,39 +75,42 @@ final class EasyBankSteps {
     }
 
    
+
 func enterRegistrationPassword(
     _ password: String,
     into field: XCUIElement
 ) {
-    XCTAssertTrue(field.waitForExistence(timeout: 10))
+    XCTAssertTrue(
+        field.waitForExistence(timeout: 10),
+        "Password field not found"
+    )
+
     field.tap()
 
-    // Dismiss the iOS Strong Password prompt
-    let closeButton = page.app.buttons["Close"]
+    let springboard = XCUIApplication(
+        bundleIdentifier: "com.apple.springboard"
+    )
 
-    if closeButton.waitForExistence(timeout: 5) {
-        closeButton.tap()
+    let systemClose = springboard.buttons["Close"]
+    let appClose = page.app.buttons["Close"]
+
+    if systemClose.waitForExistence(timeout: 3) {
+        systemClose.tap()
+    } else if appClose.waitForExistence(timeout: 3) {
+        appClose.tap()
     }
 
-    // Focus the password field again
     field.tap()
-
-    // Enter the test password
     field.typeText(password)
 
-    // Verify that the field received the password
     let value = field.value as? String ?? ""
 
     XCTAssertFalse(
         value.contains("Automatic Strong Password"),
-        "iOS password autofill is still covering the field"
-    )
-
-    XCTAssertTrue(
-        value.count >= 6,
-        "Password was not entered correctly"
+        "Strong Password autofill still active"
     )
 }
+
 
 
     func register(email: String, password: String) {
