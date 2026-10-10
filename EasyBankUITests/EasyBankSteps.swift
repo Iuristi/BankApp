@@ -76,6 +76,7 @@ final class EasyBankSteps {
 
    
 
+
 func enterRegistrationPassword(
     _ password: String,
     into field: XCUIElement
@@ -85,31 +86,30 @@ func enterRegistrationPassword(
         "Password field not found"
     )
 
-    field.tap()
+    // Show password by tapping the eye icon
+    let eye = field.coordinate(
+        withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)
+    )
+    eye.tap()
 
-    let springboard = XCUIApplication(
-        bundleIdentifier: "com.apple.springboard"
+    // Type into the visible text field
+    let visibleField = page.app.textFields[field.identifier]
+
+    XCTAssertTrue(
+        visibleField.waitForExistence(timeout: 10),
+        "Visible password field not found"
     )
 
-    let systemClose = springboard.buttons["Close"]
-    let appClose = page.app.buttons["Close"]
+    visibleField.tap()
+    visibleField.typeText(password)
 
-    if systemClose.waitForExistence(timeout: 3) {
-        systemClose.tap()
-    } else if appClose.waitForExistence(timeout: 3) {
-        appClose.tap()
-    }
-
-    field.tap()
-    field.typeText(password)
-
-    let value = field.value as? String ?? ""
-
-    XCTAssertFalse(
-        value.contains("Automatic Strong Password"),
-        "Strong Password autofill still active"
+    XCTAssertEqual(
+        visibleField.value as? String,
+        password,
+        "Password was not entered correctly"
     )
 }
+
 
 
 
