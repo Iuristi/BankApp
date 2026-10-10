@@ -1,5 +1,4 @@
 
-
 import XCTest
 
 final class EasyBankSteps {
@@ -75,20 +74,41 @@ final class EasyBankSteps {
         tap(page.onboardingRegister)
     }
 
-    func enterRegistrationPassword(
-        _ password: String,
-        into field: XCUIElement
-    ) {
-        XCTAssertTrue(field.waitForExistence(timeout: 10))
-        field.tap()
+   
+func enterRegistrationPassword(
+    _ password: String,
+    into field: XCUIElement
+) {
+    XCTAssertTrue(field.waitForExistence(timeout: 10))
+    field.tap()
 
-        if page.closePasswordPrompt.waitForExistence(timeout: 2) {
-            page.closePasswordPrompt.tap()
-            field.tap()
-        }
+    // Dismiss the iOS Strong Password prompt
+    let closeButton = page.app.buttons["Close"]
 
-        field.typeText(password)
+    if closeButton.waitForExistence(timeout: 5) {
+        closeButton.tap()
     }
+
+    // Focus the password field again
+    field.tap()
+
+    // Enter the test password
+    field.typeText(password)
+
+    // Verify that the field received the password
+    let value = field.value as? String ?? ""
+
+    XCTAssertFalse(
+        value.contains("Automatic Strong Password"),
+        "iOS password autofill is still covering the field"
+    )
+
+    XCTAssertTrue(
+        value.count >= 6,
+        "Password was not entered correctly"
+    )
+}
+
 
     func register(email: String, password: String) {
         enterText(email, into: page.registrationEmail)
