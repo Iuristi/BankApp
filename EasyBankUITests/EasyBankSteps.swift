@@ -77,27 +77,30 @@ final class EasyBankSteps {
    
 
 
+
 func enterRegistrationPassword(
     _ password: String,
     into field: XCUIElement
 ) {
+    let identifier = field.identifier
+
     XCTAssertTrue(
         field.waitForExistence(timeout: 10),
-        "Password field not found"
+        "Password field not found: \(identifier)"
     )
 
-    // Show password by tapping the eye icon
+    // Show password before typing
     let eye = field.coordinate(
         withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)
     )
     eye.tap()
 
-    // Type into the visible text field
-    let visibleField = page.app.textFields[field.identifier]
+    // Query the field again after visibility changes
+    let visibleField = page.app.textFields[identifier]
 
     XCTAssertTrue(
         visibleField.waitForExistence(timeout: 10),
-        "Visible password field not found"
+        "Visible password field not found: \(identifier)"
     )
 
     visibleField.tap()
@@ -109,6 +112,7 @@ func enterRegistrationPassword(
         "Password was not entered correctly"
     )
 }
+
 
 
 
